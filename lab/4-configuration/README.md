@@ -1,4 +1,4 @@
-# Configuration
+# Application Configuration
 
 Configuration of an application may be done through:
 
@@ -6,7 +6,9 @@ Configuration of an application may be done through:
 - Files
 - Services
 
-Grabbing your configuration using a Service is something that you can do using the Service Discovery as described in lab4
+Grabbing your configuration using a Service is something that you can do using the Service Discovery as described in lab3: Service
+
+## Environment variables
 
 Environment variables can directly be set inside the pod definition at container level. We had an example with HOSTNAME in the first lab:
 
@@ -28,7 +30,7 @@ spec:
     - containerPort: 8080
 ```
 
-It is possible to inject in environment variables some values that comes from different sources ( see the api [here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#envvarsource-v1-core) ):
+It is possible to inject in environment variables some values that comes from different sources ( see the api [here](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/) ):
 
 - fieldRef: pod information. You have access to the invariant information such as:
   - metadata.name
@@ -38,36 +40,36 @@ It is possible to inject in environment variables some values that comes from di
   - status.hostIP
   - status.podIP
 - resourceFieldRef: information about limits and requests of memory and cpu
-- configMapKeyRef: values associated to a key i a configmap
-- secretKeyRef: values associated to a key i a configmap
+- configMapKeyRef: values associated to a key i a `ConfigMap`
+- secretKeyRef: values associated to a key i a `ConfigMap`
 
-Note that the `metadta.name` value is already injected in the environment variable `HOSTNAME`
+Note that the `metadata.name` value is already injected in the environment variable `HOSTNAME`
 
-## Exercices
+### EnvVars: Exercises
 
-### Exercise 1
+#### EnvVars: Exercise 1
 
-Modify the pod definition and create a pod containing a variable NAMESPACE.
+Modify the pod definition and create a pod containing a variable NAMESPACE containing the `Pod` namespace.
 
-### Exercise 2
+#### EnvVars: Exercise 2
 
 Modify the pod definition and create a pod containing a variable with a label. Does it work? why?
 
 ## ConfigMap
 
-A configmap allow you inject files in your pod. The configmap content can be modified, so that the new file content is distributed to all the pod using that config map.
+A `ConfigMap` allow you inject files in your pod. The `ConfigMap` content can be modified, so that the new file content is distributed to all the pod using that config map.
 
-You can create a configmap from file or directory directly using kubectl:
+You can create a `ConfigMap` from file or directory directly using `kubectl`:
 
 ```console
-> kubectl create configmap myconfig --from-file=configfolder
+➜ kubectl create configmap myconfig --from-file=configfolder
 configmap "myconfig" created
 ```
 
 Let's check the content of the create object:
 
 ```console
-> kubectl get cm myconfig -oyaml
+➜ kubectl get cm myconfig -oyaml
 ```
 
 ```yaml
@@ -77,27 +79,26 @@ data:
   file2.txt: content of file 2
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2018-07-05T09:46:05Z
+  creationTimestamp: "2022-06-10T07:46:16Z"
   name: myconfig
-  namespace: default
-  resourceVersion: "157692"
-  selfLink: /api/v1/namespaces/default/configmaps/myconfig
-  uid: 3c303bb3-8038-11e8-a9a4-0800270f19f1
+  namespace: labkube
+  resourceVersion: "194477"
+  uid: cb8a5d99-be68-4219-ad1d-12a3ed7def30
 ```
 
-Let's consume that configmap in our pod. 
+Let's consume that `ConfigMap` in our pod.
 
 First let's use environment variables with deployment-1
 
 ```console
-> kubectl create -f deployment-1.yaml
+➜ kubectl create -f deployment-1.yaml
 deployment "labkube-cm" created
 ```
 
 Here the section that was added to the deployment
 
 ```yaml
-env:
+        env:
         - name: KEY_FROM_CM
           valueFrom:
             configMapKeyRef:
@@ -105,10 +106,10 @@ env:
               key: file1.txt
 ```
 
-Check the container environment
+Check the container environment:
 
 ```console
-> kubectl exec labkube-cm-bdc6b5749-8sqsx -- env
+➜ kubectl exec labkube-cm-bdc6b5749-8sqsx -- env
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 HOSTNAME=labkube-cm-bdc6b5749-8sqsx
 KEY_FROM_CM=content of file1
@@ -119,16 +120,16 @@ KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
 ...
 ```
 
-Now let's make a deployment that consume the configmap as files
+Now let's make a deployment that consume the `ConfigMap` as files
 
 ```console
-> kubectl create -f deployment-2.yaml 
+➜ kubectl create -f deployment-2.yaml 
 deployment "labkube-cmfile" created
 ```
 
 In our deployment we had to append 2 sections:
 
-- One to declare a volume and associate it to the configmap
+- One to declare a volume and associate it to the `ConfigMap`
 - One to mount the volume in the container
 
 ```yaml
@@ -145,12 +146,12 @@ In our deployment we had to append 2 sections:
             name: myconfig
 ```
 
-### Exercise
+### ConfigMap Exercises
 
-#### Exercise 1
+#### ConfigMap Exercise 1
 
 Enter the pod generated by the last deployment and find where the file was injected. Check the content of the file.
 
-#### Exercice 2
+#### ConfigMap Exercise 2
 
-Change the content of the configmap using `edit`. Check that the file is modified inside you pod.
+Change the content of the `ConfigMap` using `edit`. Check that the file is modified inside you pod.
