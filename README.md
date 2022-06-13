@@ -4,8 +4,8 @@
 
 1. A laptop
 1. Internet access
-1. Access to a Kubernetes cluster. Of course a personal or a test a test cluster :) . 
-   It can be: 
+1. Access to a Kubernetes cluster. Of course a personal or a test a test cluster :) .
+   It can be:
     * [kind](https://kind.sigs.k8s.io/)
     * [minikube](https://minikube.sigs.k8s.io/docs/start/)
     * A manage solution like [Google GKE](https://console.cloud.google.com/kubernetes/add)....
@@ -20,7 +20,7 @@ For the need of this lab, it can be interesting to create a multi nodes cluster.
 installation process. To create a local multi nodes cluster, runs the following command
 
 ```console
-➜ kind create cluster --config config/cluster-kind.yaml
+➜ kind create cluster --config config/cluster-kind.yaml --name labkube
 Creating cluster "labkube" ...
 ...
 You can now use your cluster with:
